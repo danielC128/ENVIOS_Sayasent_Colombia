@@ -3,7 +3,6 @@ import cors from 'cors';
 import { initDb, getPrisma, closeDb } from './lib/db.js';
 import { initFirebase } from './lib/firebase.js';
 import { WhatsAppCampaignManager } from './lib/campaign-manager.js';
-import { verifyWebhook, processWebhook } from './lib/webhook-handler.js';
 
 const SERVICE_NAME = 'sayasent-colombia-envios';
 
@@ -43,8 +42,6 @@ async function main() {
         'GET  /api/templates/:id',
         'POST /api/templates',
         'GET  /api/contacts?segmento=&estrategia=',
-        'GET  /webhook/whatsapp',
-        'POST /webhook/whatsapp',
       ],
     });
   });
@@ -172,19 +169,6 @@ async function main() {
       res.json({ success: true, data: contacts });
     } catch (e) {
       res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  // ===== Webhook Meta =====
-  app.get('/webhook/whatsapp', verifyWebhook);
-
-  app.post('/webhook/whatsapp', async (req, res) => {
-    // Responder 200 siempre para que Meta no reintente; procesamos best-effort.
-    res.json({ received: true, timestamp: new Date().toISOString() });
-    try {
-      await processWebhook(req.body);
-    } catch (e) {
-      console.error('❌ [WEBHOOK] Error procesando:', e);
     }
   });
 
