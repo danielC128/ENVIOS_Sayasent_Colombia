@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigoAsociado   String            @unique(map: "uq_clientes_codigo_asociado") @map("codigo_asociado") @db.VarChar(150)
+  dni              String            @unique(map: "uq_clientes_dni") @db.VarChar(20)
+  telefono         String            @db.VarChar(20)
+  nombre           String            @db.VarChar(150)
+  monto            Decimal           @default(0) @db.Decimal(12, 2)
+  probabilidad     Decimal?          @db.Decimal(5, 2)
+  segmento         String?           @db.VarChar(50)
+  estrategia       String?           @db.VarChar(50)
+  fechaAsamblea    DateTime?         @map("fecha_asamblea") @db.Date
+  fechaVencimiento DateTime?         @map("fecha_vencimiento") @db.Date
+  fecUltPagCcap    DateTime?         @map("fec_ult_pag_ccap") @db.Date
+  mes              String?           @db.VarChar(20)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  campaignContacts CampaignContact[]
+
+  @@index([estrategia], map: "idx_clientes_estrategia")
+  @@index([fechaVencimiento], map: "idx_clientes_fecha_vencimiento")
+  @@index([segmento], map: "idx_clientes_segmento")
+  @@map("clientes")
+}
+
+model Template {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String     @unique(map: "uq_templates_nombre") @db.VarChar(120)
+  descripcion String?
+  contenido   String
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  campaigns   Campaign[]
+
+  @@map("templates")
+}
+
+model Campaign {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre           String            @db.VarChar(150)
+  templateId       String?           @map("template_id") @db.Uuid
+  databaseName     String            @default("clientes") @map("database_name") @db.VarChar(100)
+  sendMode         String?           @map("send_mode") @db.VarChar(2)
+  segmentoFilter   String?           @map("segmento_filter") @db.VarChar(50)
+  estrategiaFilter String?           @map("estrategia_filter") @db.VarChar(50)
+  totalContacts    Int               @default(0) @map("total_contacts")
+  status           String            @default("draft") @db.VarChar(20)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  scheduledAt      DateTime?         @map("scheduled_at") @db.Timestamp(6)
+  startedAt        DateTime?         @map("started_at") @db.Timestamp(6)
+  finishedAt       DateTime?         @map("finished_at") @db.Timestamp(6)
+  variableMappings Json              @default("{}") @map("variable_mappings")
+  campaignContacts CampaignContact[]
+  mensajeOuts      MensajeOut[]
+  template         Template?         @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([status], map: "idx_campaigns_status")
+  @@index([templateId], map: "idx_campaigns_template")
+  @@map("campaigns")
+}
+
+model CampaignContact {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campaignId          String       @map("campaign_id") @db.Uuid
+  clienteId           String       @map("cliente_id") @db.Uuid
+  personalizedMessage String?      @map("personalized_message")
+  sendStatus          String       @default("pending") @map("send_status") @db.VarChar(20)
+  sentAt              DateTime?    @map("sent_at") @db.Timestamp(6)
+  deliveredAt         DateTime?    @map("delivered_at") @db.Timestamp(6)
+  readAt              DateTime?    @map("read_at") @db.Timestamp(6)
+  failedAt            DateTime?    @map("failed_at") @db.Timestamp(6)
+  failureReason       String?      @map("failure_reason")
+  createdAt           DateTime     @default(now()) @map("created_at") @db.Timestamp(6)
+  whatsappMessageId   String?      @map("whatsapp_message_id") @db.VarChar(255)
+  failureCode         String?      @map("failure_code") @db.VarChar(50)
+  retryCount          Int          @default(0) @map("retry_count")
+  repliedAt           DateTime?    @map("replied_at") @db.Timestamp(6)
+  campaign            Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  cliente             Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  mensajeOuts         MensajeOut[]
+
+  @@unique([campaignId, clienteId], map: "uq_campaign_contact")
+  @@index([campaignId], map: "idx_campaign_contacts_campaign")
+  @@index([sendStatus], map: "idx_campaign_contacts_status")
+  @@index([whatsappMessageId], map: "idx_campaign_contacts_wa_msg_id")
+  @@map("campaign_contacts")
+}
+
+model MensajeOut {
+  idMsg             String               @id @map("id_msg")
+  campaignContactId String?              @map("campaign_contact_id") @db.Uuid
+  campaignId        String?              @map("campaign_id") @db.Uuid
+  phoneTo           String               @map("phone_to")
+  templateName      String               @map("template_name")
+  templateLang      String               @map("template_lang")
+  sentAt            DateTime             @default(now()) @map("sent_at") @db.Timestamp(6)
+  campaignContact   CampaignContact?     @relation(fields: [campaignContactId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  campaign          Campaign?            @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  statusEvents      MensajeStatusEvent[]
+
+  @@index([campaignId], map: "idx_mensaje_out_campaign")
+  @@index([campaignContactId], map: "idx_mensaje_out_contact")
+  @@map("mensaje_out")
+}
+
+model MensajeStatusEvent {
+  id               BigInt     @id @default(autoincrement())
+  idMsg            String     @map("id_msg")
+  estado           String
+  tsUnix           BigInt?    @map("ts_unix")
+  recipientId      String?    @map("recipient_id")
+  pricingJson      Json?      @map("pricing_json")
+  conversationJson Json?      @map("conversation_json")
+  errorsJson       Json?      @map("errors_json")
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
+  mensajeOut       MensajeOut @relation(fields: [idMsg], references: [idMsg], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([idMsg], map: "idx_mensaje_status_event_id_msg")
+  @@index([createdAt(sort: Desc)], map: "idx_mensaje_status_event_created_at")
+  @@map("mensaje_status_event")
+}
+
+model WebhookLog {
+  id        BigInt   @id @default(autoincrement())
+  eventType String?  @map("event_type") @db.VarChar(100)
+  payload   Json?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt(sort: Desc)], map: "idx_webhook_logs_created_at")
+  @@map("webhook_logs")
+}

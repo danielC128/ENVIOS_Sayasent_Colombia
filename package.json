@@ -1,0 +1,40 @@
+{
+  "name": "envios-meta-sayasent-colombia",
+  "version": "1.0.0",
+  "description": "Motor de envíos WhatsApp (Meta Business API) para Sayasent Colombia — Cloud Run service",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch --env-file=.env index.js",
+    "start": "node index.js",
+    "db:pull": "npx prisma db pull",
+    "db:generate": "npx prisma generate",
+    "db:sync": "npm run db:pull && npm run db:generate",
+    "build": "npm run db:generate"
+  },
+  "keywords": [
+    "whatsapp",
+    "meta-business-api",
+    "campaigns",
+    "messaging",
+    "bulk-messaging",
+    "nodejs",
+    "express",
+    "prisma",
+    "firebase",
+    "cloud-run",
+    "google-cloud"
+  ],
+  "author": "Your Company",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^1.2.1",
+    "@prisma/client": "^5.22.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase-admin": "^12.2.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}

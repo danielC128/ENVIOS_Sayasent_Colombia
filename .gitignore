@@ -1,0 +1,38 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.yaml.secret
+firebase-credentials.json
+service-account*.json
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Prisma
+/prisma/migrations/dev.db*
+
+# Build / runtime
+dist/
+build/
+.cache/
+tmp/
+*.log
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code local config
+.claude/
+
+# Scratch / temp
+patch.sed
+apply-logs.js
+.dockerignore-new
