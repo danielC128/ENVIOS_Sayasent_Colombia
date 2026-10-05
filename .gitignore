@@ -5,6 +5,9 @@
 *.yaml.secret
 firebase-credentials.json
 service-account*.json
+cloud_storage_key/
+*-key.json
+*.serviceaccount.json
 
 # Node
 node_modules/

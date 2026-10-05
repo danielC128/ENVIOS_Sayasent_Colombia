@@ -98,6 +98,32 @@ async function main() {
     }
   });
 
+  // Reintento por el número alterno. Lo llama el webhook cuando Meta avisa que
+  // el mensaje no se entregó (para entonces la campaña ya terminó, así que el
+  // motor no puede reintentar solo). Es idempotente: si el webhook llega
+  // duplicado, el segundo no vuelve a enviar.
+  app.post('/api/campaign-contacts/:id/retry-alterno', async (req, res) => {
+    try {
+      const result = await campaignManager.retryAlternoContacto(req.params.id);
+      res.json({ success: true, ...result });
+    } catch (e) {
+      console.error(`❌ [RETRY-ALTERNO] ${req.params.id}:`, e);
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+
+  // Modo lote: para recuperar el backlog o como botón manual desde el CRM.
+  app.post('/api/retry-alternos', async (req, res) => {
+    const { campaignId = null, limit } = req.body || {};
+    try {
+      const result = await campaignManager.retryAlternosLote({ campaignId, limit });
+      res.json({ success: true, ...result });
+    } catch (e) {
+      console.error('❌ [RETRY-ALTERNO] lote:', e);
+      res.status(500).json({ success: false, error: e.message });
+    }
+  });
+
   app.get('/api/campaigns/:id/metrics', async (req, res) => {
     try {
       const prisma = getPrisma();

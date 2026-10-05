@@ -7,68 +7,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Cliente {
-  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  codigoAsociado   String            @unique(map: "uq_clientes_codigo_asociado") @map("codigo_asociado") @db.VarChar(150)
-  dni              String            @unique(map: "uq_clientes_dni") @db.VarChar(20)
-  telefono         String            @db.VarChar(20)
-  nombre           String            @db.VarChar(150)
-  monto            Decimal           @default(0) @db.Decimal(12, 2)
-  probabilidad     Decimal?          @db.Decimal(5, 2)
-  segmento         String?           @db.VarChar(50)
-  estrategia       String?           @db.VarChar(50)
-  fechaAsamblea    DateTime?         @map("fecha_asamblea") @db.Date
-  fechaVencimiento DateTime?         @map("fecha_vencimiento") @db.Date
-  fecUltPagCcap    DateTime?         @map("fec_ult_pag_ccap") @db.Date
-  mes              String?           @db.VarChar(20)
-  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
-  campaignContacts CampaignContact[]
+  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigoAsociado         String              @unique(map: "uq_clientes_codigo_asociado") @map("codigo_asociado") @db.VarChar(150)
+  dni                    String              @unique(map: "uq_clientes_dni") @db.VarChar(20)
+  telefono               String              @db.VarChar(20)
+  nombre                 String              @db.VarChar(150)
+  monto                  Decimal             @default(0) @db.Decimal(12, 2)
+  probabilidad           Decimal?            @db.Decimal(5, 2)
+  segmento               String?             @db.VarChar(50)
+  estrategia             String?             @db.VarChar(50)
+  fechaAsamblea          DateTime?           @map("fecha_asamblea") @db.Date
+  fechaVencimiento       DateTime?           @map("fecha_vencimiento") @db.Date
+  fecUltPagCcap          DateTime?           @map("fec_ult_pag_ccap") @db.Date
+  mes                    String?             @db.VarChar(20)
+  createdAt              DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt              DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  frente                 String?             @db.VarChar(100)
+  fechaVencimientoPasado DateTime?           @map("fecha_vencimiento_pasado") @db.Date
+  mesPasado              String?             @map("mes_pasado") @db.VarChar(50)
+  monto1                 Decimal?            @map("monto_1") @db.Decimal(12, 2)
+  monto2                 Decimal?            @map("monto_2") @db.Decimal(12, 2)
+  monto3                 Decimal?            @map("monto_3") @db.Decimal(12, 2)
+  ctaActPag              Int?                @map("cta_act_pag")
+  telefono3              String?             @map("telefono_3") @db.VarChar(20)
+  rangoMonto             String?             @map("rango_monto") @db.VarChar(100)
+  fecha_1ra_asamblea     DateTime?           @db.Date
+  fecha_inscripcion      DateTime?           @db.Date
+  tipo_asamblea          String?             @db.VarChar(12)
+  opt_out                Boolean             @default(false)
+  opt_out_ts             DateTime?           @db.Timestamptz(6)
+  es_prueba              Boolean             @default(false)
+  wa_user_id             String?             @db.VarChar(64)
+  wa_username            String?             @db.VarChar(64)
+  campaignContacts       CampaignContact[]
+  chatMessages           ChatMessage[]
+  edu_etapa_cliente      edu_etapa_cliente[]
 
   @@index([estrategia], map: "idx_clientes_estrategia")
   @@index([fechaVencimiento], map: "idx_clientes_fecha_vencimiento")
   @@index([segmento], map: "idx_clientes_segmento")
+  @@index([rangoMonto], map: "idx_clientes_rango_monto")
   @@map("clientes")
 }
 
 model Template {
-  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre      String     @unique(map: "uq_templates_nombre") @db.VarChar(120)
-  descripcion String?
-  contenido   String
-  metaId      String?    @map("meta_id") @db.VarChar(100)
-  estadoMeta  String?    @map("estado_meta") @db.VarChar(20)
-  categoria   String?    @db.VarChar(30)
-  idioma      String?    @db.VarChar(10)
-  header      String?
-  footer      String?
-  botones     Json?
-  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
-  campaigns   Campaign[]
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String     @unique(map: "uq_templates_nombre") @db.VarChar(120)
+  descripcion    String?
+  contenido      String
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt      DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  metaId         String?    @map("meta_id") @db.VarChar(100)
+  estadoMeta     String?    @map("estado_meta") @db.VarChar(20)
+  categoria      String?    @db.VarChar(30)
+  idioma         String?    @db.VarChar(10)
+  header         String?
+  footer         String?
+  botones        Json?
+  birdProjectId  String?    @map("bird_project_id") @db.VarChar(100)
+  headerType     String?    @map("header_type") @db.VarChar(20)
+  headerMediaUrl String?    @map("header_media_url")
+  campaigns      Campaign[]
 
   @@index([estadoMeta], map: "idx_templates_estado_meta")
   @@map("templates")
 }
 
 model Campaign {
-  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre           String            @db.VarChar(150)
-  templateId       String?           @map("template_id") @db.Uuid
-  databaseName     String            @default("clientes") @map("database_name") @db.VarChar(100)
-  sendMode         String?           @map("send_mode") @db.VarChar(2)
-  segmentoFilter   String?           @map("segmento_filter") @db.VarChar(50)
-  estrategiaFilter String?           @map("estrategia_filter") @db.VarChar(50)
-  totalContacts    Int               @default(0) @map("total_contacts")
-  status           String            @default("draft") @db.VarChar(20)
-  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-  scheduledAt      DateTime?         @map("scheduled_at") @db.Timestamp(6)
-  startedAt        DateTime?         @map("started_at") @db.Timestamp(6)
-  finishedAt       DateTime?         @map("finished_at") @db.Timestamp(6)
-  variableMappings Json              @default("{}") @map("variable_mappings")
-  campaignContacts CampaignContact[]
-  mensajeOuts      MensajeOut[]
-  template         Template?         @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre                 String            @db.VarChar(150)
+  templateId             String            @map("template_id") @db.Uuid
+  databaseName           String            @default("clientes") @map("database_name") @db.VarChar(100)
+  sendMode               String            @map("send_mode") @db.VarChar(2)
+  segmentoFilter         String?           @map("segmento_filter")
+  estrategiaFilter       String?           @map("estrategia_filter")
+  totalContacts          Int               @default(0) @map("total_contacts")
+  status                 String            @default("draft") @db.VarChar(20)
+  createdAt              DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
+  scheduledAt            DateTime?         @map("scheduled_at") @db.Timestamp(6)
+  startedAt              DateTime?         @map("started_at") @db.Timestamp(6)
+  finishedAt             DateTime?         @map("finished_at") @db.Timestamp(6)
+  variableMappings       Json              @default("{}") @map("variable_mappings")
+  frenteFilter           String?           @map("frente_filter")
+  notificationSentAt     DateTime?         @map("notification_sent_at") @db.Timestamp(6)
+  refreshOnSend          Boolean           @default(false) @map("refresh_on_send")
+  gestionType            String?           @map("gestion_type") @db.VarChar(20)
+  rangoMontoFilter       String?           @map("rango_monto_filter")
+  fechaVencimientoManual DateTime?         @map("fecha_vencimiento_manual") @db.Date
+  fechaAsambleaManual    DateTime?         @map("fecha_asamblea_manual") @db.Date
+  etapa_bot              String?           @db.VarChar(20)
+  journey_paso           String?           @db.VarChar(30)
+  bot_vinculada_at       DateTime?         @db.Timestamptz(6)
+  /// Contactos que no entraron por el Bot Educador: [{codigoAsociado, numDoc, nombre, motivo}].
+  excluidos_bot          Json?
+  campaignContacts       CampaignContact[]
+  template               Template          @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  mensajeOuts            MensajeOut[]
 
   @@index([status], map: "idx_campaigns_status")
   @@index([templateId], map: "idx_campaigns_template")
@@ -91,6 +127,13 @@ model CampaignContact {
   failureCode         String?      @map("failure_code") @db.VarChar(50)
   retryCount          Int          @default(0) @map("retry_count")
   repliedAt           DateTime?    @map("replied_at") @db.Timestamp(6)
+  phone1              String?      @map("phone_1") @db.VarChar(20)
+  failureCode1        String?      @map("failure_code_1") @db.VarChar(50)
+  failureReason1      String?      @map("failure_reason_1")
+  phone2              String?      @map("phone_2") @db.VarChar(20)
+  failureCode2        String?      @map("failure_code_2") @db.VarChar(50)
+  failureReason2      String?      @map("failure_reason_2")
+  phoneUsed           String?      @map("phone_used") @db.VarChar(20)
   campaign            Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   cliente             Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   mensajeOuts         MensajeOut[]
@@ -144,4 +187,294 @@ model WebhookLog {
 
   @@index([createdAt(sort: Desc)], map: "idx_webhook_logs_created_at")
   @@map("webhook_logs")
+}
+
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model ChatMessage {
+  id                                                               BigInt             @id @default(autoincrement())
+  wamid                                                            String?            @unique @db.VarChar(255)
+  direction                                                        String             @db.VarChar(10)
+  phone                                                            String?            @db.VarChar(20)
+  clienteId                                                        String?            @map("cliente_id") @db.Uuid
+  messageType                                                      String?            @map("message_type") @db.VarChar(30)
+  textBody                                                         String?            @map("text_body")
+  templateName                                                     String?            @map("template_name") @db.VarChar(120)
+  templateParams                                                   Json?              @map("template_params")
+  rawMeta                                                          Json?              @map("raw_meta")
+  tsMeta                                                           DateTime?          @map("ts_meta") @db.Timestamptz(6)
+  createdAt                                                        DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  status                                                           String?            @db.VarChar(20)
+  origen                                                           String?            @db.VarChar(12)
+  episodio_id                                                      String?            @db.Uuid
+  edu_etapa_id                                                     BigInt?
+  edu_incidencia_id                                                BigInt?
+  wa_user_id                                                       String?            @db.VarChar(64)
+  wa_username                                                      String?            @db.VarChar(64)
+  perfil_nombre                                                    String?            @db.VarChar(120)
+  transcripcion                                                    String?
+  transcripcion_motor                                              String?
+  cliente                                                          Cliente?           @relation(fields: [clienteId], references: [id], onUpdate: NoAction)
+  edu_etapa_cliente                                                edu_etapa_cliente? @relation(fields: [edu_etapa_id], references: [etapa_cliente_id], onUpdate: NoAction, map: "fk_chat_edu_etapa")
+  edu_incidencia_chat_messages_edu_incidencia_idToedu_incidencia   edu_incidencia?    @relation("chat_messages_edu_incidencia_idToedu_incidencia", fields: [edu_incidencia_id], references: [incidencia_id], onUpdate: NoAction, map: "fk_chat_edu_inc")
+  edu_clasificacion                                                edu_clasificacion?
+  edu_incidencia_edu_incidencia_chat_message_origenTochat_messages edu_incidencia[]   @relation("edu_incidencia_chat_message_origenTochat_messages")
+  edu_score_evento                                                 edu_score_evento[]
+
+  @@index([phone, createdAt(sort: Desc)], map: "idx_chat_messages_phone_created")
+  @@index([clienteId], map: "idx_chat_messages_cliente")
+  @@index([edu_etapa_id, createdAt], map: "ix_chat_edu_etapa")
+  @@map("chat_messages")
+}
+
+/// Usuarios del CRM (login + roles). Ver prisma/add-crm-usuarios.sql.
+model CrmUsuario {
+  id                   String                   @id @default(dbgenerated("gen_random_uuid()")) @map("id_usuario") @db.Uuid
+  email                String                   @unique @db.VarChar(150)
+  nombre               String                   @db.VarChar(100)
+  passwordHash         String                   @default("temp_hash") @map("password_hash") @db.VarChar(255)
+  rol                  String                   @default("asesor") @db.VarChar(20)
+  activo               Boolean                  @default(true)
+  ultimoLogin          DateTime?                @map("ultimo_login") @db.Timestamptz(6)
+  createdAt            DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                 @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  acciones             CrmAccion[]
+  asignacionesHechas   CrmAsignacion[]          @relation("asignacion_por")
+  asignaciones         CrmAsignacion[]          @relation("asignacion_asesor")
+  historialAsignadoPor CrmAsignacionHistorial[] @relation("historial_por")
+  historialAsesor      CrmAsignacionHistorial[] @relation("historial_asesor")
+
+  @@map("crm_usuarios")
+}
+
+/// Asesor que atiende una etapa del bot (v2: edu_etapa_cliente.etapa_uuid).
+/// Ver prisma/crm-v2-foraneas-edu.sql.
+model CrmAsignacion {
+  etapaId     String            @id @map("etapa_id") @db.Uuid
+  idAsesor    String            @map("id_asesor") @db.Uuid
+  asignadoPor String?           @map("asignado_por") @db.Uuid
+  asignadoAt  DateTime          @default(now()) @map("asignado_at") @db.Timestamptz(6)
+  porUsuario  CrmUsuario?       @relation("asignacion_por", fields: [asignadoPor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  asesor      CrmUsuario        @relation("asignacion_asesor", fields: [idAsesor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  etapa       edu_etapa_cliente @relation(fields: [etapaId], references: [etapa_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk_asig_etapa")
+
+  @@index([idAsesor], map: "idx_crm_asignacion_asesor")
+  @@map("crm_asignacion")
+}
+
+model CrmAsignacionHistorial {
+  id           BigInt            @id @default(autoincrement())
+  etapaId      String            @map("etapa_id") @db.Uuid
+  incidenciaId String?           @map("incidencia_id") @db.Uuid
+  idAsesor     String?           @map("id_asesor") @db.Uuid
+  asignadoPor  String?           @map("asignado_por") @db.Uuid
+  ts           DateTime          @default(now()) @db.Timestamptz(6)
+  porUsuario   CrmUsuario?       @relation("historial_por", fields: [asignadoPor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  asesor       CrmUsuario?       @relation("historial_asesor", fields: [idAsesor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  etapa        edu_etapa_cliente @relation(fields: [etapaId], references: [etapa_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk_hist_etapa")
+  incidencia   edu_incidencia?   @relation(fields: [incidenciaId], references: [incidencia_uuid], onUpdate: NoAction, map: "fk_hist_inc")
+
+  @@index([etapaId, ts(sort: Desc)], map: "idx_crm_asig_hist_etapa")
+  @@map("crm_asignacion_historial")
+}
+
+/// Gestion que registra el asesor (llamada, WhatsApp, nota). NO cierra la
+/// incidencia: eso va por el endpoint del bot.
+model CrmAccion {
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  etapaId       String            @map("etapa_id") @db.Uuid
+  incidenciaId  String?           @map("incidencia_id") @db.Uuid
+  idUsuario     String            @map("id_usuario") @db.Uuid
+  tipo          String            @db.VarChar(20)
+  resultado     String            @db.VarChar(30)
+  observaciones String?
+  duracionSeg   Int?              @map("duracion_seg")
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  usuario       CrmUsuario        @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  etapa         edu_etapa_cliente @relation(fields: [etapaId], references: [etapa_uuid], onDelete: Cascade, onUpdate: NoAction, map: "fk_acc_etapa")
+  incidencia    edu_incidencia?   @relation(fields: [incidenciaId], references: [incidencia_uuid], onUpdate: NoAction, map: "fk_acc_inc")
+
+  @@index([etapaId, createdAt(sort: Desc)], map: "idx_crm_acciones_etapa")
+  @@map("crm_acciones")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model edu_clasificacion {
+  categoria         String
+  confianza         Decimal?    @db.Decimal(4, 3)
+  marcas            Json        @default("{}")
+  motor             String
+  version_motor     String
+  requiere_revision Boolean     @default(false)
+  categoria_humana  String?
+  revisado_por      String?
+  revisado_en       DateTime?   @db.Timestamptz(6)
+  creado_en         DateTime    @default(now()) @db.Timestamptz(6)
+  chat_message_id   BigInt      @unique(map: "ix_edu_clas_chat")
+  tono              String?
+  chat_messages     ChatMessage @relation(fields: [chat_message_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_clas_chat")
+}
+
+model edu_etapa_cliente {
+  etapa_cliente_id       BigInt                   @id @default(autoincrement())
+  cliente_id             String                   @db.Uuid
+  etapa                  edu_etapa_enum
+  ventana_inicio         DateTime                 @db.Date
+  ventana_fin            DateTime                 @db.Date
+  riesgo                 edu_riesgo_enum?
+  prob_caida             Decimal?                 @db.Decimal(6, 5)
+  journey_version        String                   @default("v1")
+  estado_etapa           edu_estado_etapa_enum    @default(NO_INICIADA)
+  score_inicio           Decimal                  @db.Decimal(5, 2)
+  score_actual           Decimal                  @db.Decimal(5, 2)
+  tuvo_interaccion       Boolean                  @default(false)
+  estado_conversacional  edu_estado_conv_enum?
+  motivo_principal       String?
+  thread_id              String?
+  ultima_respuesta_en    DateTime?                @db.Timestamptz(6)
+  bot_pausado_hasta      DateTime?                @db.Timestamptz(6)
+  abierto_en             DateTime?                @db.Timestamptz(6)
+  cerrado_en             DateTime?                @db.Timestamptz(6)
+  etapa_uuid             String                   @unique(map: "ix_edu_etapa_uuid") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ciclo                  Int
+  codigos                String[]
+  chat_messages          ChatMessage[]
+  crmAcciones            CrmAccion[]
+  crmAsignacion          CrmAsignacion?
+  crmAsignacionHistorial CrmAsignacionHistorial[]
+  clientes               Cliente                  @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  edu_incidencia         edu_incidencia[]
+  edu_pendiente          edu_pendiente[]
+  edu_score_evento       edu_score_evento[]
+
+  @@unique([cliente_id, etapa, ciclo], map: "uq_edu_etapa_ciclo")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model edu_incidencia {
+  incidencia_id                                                   BigInt                   @id @default(autoincrement())
+  etapa_cliente_id                                                BigInt
+  categoria                                                       String
+  abierta_en                                                      DateTime                 @default(now()) @db.Timestamptz(6)
+  estado                                                          edu_estado_inc_enum      @default(ABIERTA)
+  intentos_bot                                                    Int                      @default(0) @db.SmallInt
+  insistencias                                                    Int                      @default(0) @db.SmallInt
+  ultimo_contacto_en                                              DateTime?                @db.Timestamptz(6)
+  cerrada_en                                                      DateTime?                @db.Timestamptz(6)
+  resuelta                                                        Boolean?                 @default(dbgenerated("(estado = ANY (ARRAY['RESUELTA_BOT'::edu_estado_inc_enum, 'RESUELTA_HUMANO'::edu_estado_inc_enum]))"))
+  incidencia_uuid                                                 String                   @unique(map: "ix_edu_inc_uuid") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  derivada_en                                                     DateTime?                @db.Timestamptz(6)
+  motivo_derivacion                                               String?
+  cola                                                            String                   @default("general")
+  asesor                                                          String?
+  atendida_en                                                     DateTime?                @db.Timestamptz(6)
+  resultado                                                       String?
+  sla_horas                                                       Decimal?                 @db.Decimal(6, 2)
+  chat_message_origen                                             BigInt?
+  intentos_contacto                                               Int                      @default(0) @db.SmallInt
+  agendada_para                                                   DateTime?                @db.Timestamptz(6)
+  observaciones                                                   String?
+  /// Tipo de tarea para el asesor. Lo calcula la base desde `categoria`:
+  /// RECLAMO | RETIRO | CAJA_NEGRA | PREGUNTA.
+  tipo                                                            String?                  @default(dbgenerated("\nCASE categoria\n    WHEN 'caja_negra'::text THEN 'CAJA_NEGRA'::text\n    WHEN 'contradictoria'::text THEN 'RECLAMO'::text\n    WHEN 'incompleta'::text THEN 'RECLAMO'::text\n    WHEN 'reclamo_frustracion'::text THEN 'RECLAMO'::text\n    WHEN 'retiro'::text THEN 'RETIRO'::text\n    ELSE 'PREGUNTA'::text\nEND"))
+  retiro_declarado                                                String?
+  chat_messages_chat_messages_edu_incidencia_idToedu_incidencia   ChatMessage[]            @relation("chat_messages_edu_incidencia_idToedu_incidencia")
+  crmAcciones                                                     CrmAccion[]
+  crmAsignacionHistorial                                          CrmAsignacionHistorial[]
+  edu_etapa_cliente                                               edu_etapa_cliente        @relation(fields: [etapa_cliente_id], references: [etapa_cliente_id], onDelete: Cascade, onUpdate: NoAction)
+  chat_messages_edu_incidencia_chat_message_origenTochat_messages ChatMessage?             @relation("edu_incidencia_chat_message_origenTochat_messages", fields: [chat_message_origen], references: [id], onUpdate: NoAction, map: "fk_inc_chat")
+  edu_score_evento                                                edu_score_evento[]
+}
+
+model edu_pendiente {
+  bsp_message_id    String            @id
+  etapa_cliente_id  BigInt
+  texto             String?
+  tipo_media        String?
+  recibido_en       DateTime          @default(now()) @db.Timestamptz(6)
+  tomado            Boolean           @default(false)
+  tomado_en         DateTime?         @db.Timestamptz(6)
+  chat_message_id   BigInt?
+  edu_etapa_cliente edu_etapa_cliente @relation(fields: [etapa_cliente_id], references: [etapa_cliente_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([etapa_cliente_id, tomado, recibido_en], map: "idx_edu_pendiente")
+}
+
+model edu_score_evento {
+  evento_id         BigInt            @id @default(autoincrement())
+  etapa_cliente_id  BigInt
+  ocurrido_en       DateTime          @default(now()) @db.Timestamptz(6)
+  motivo            String
+  grupo             String?
+  incidencia_id     BigInt?
+  puntos            Decimal           @db.Decimal(5, 2)
+  score_antes       Decimal           @db.Decimal(5, 2)
+  score_despues     Decimal           @db.Decimal(5, 2)
+  version_pesos     String
+  nota              String?
+  chat_message_id   BigInt?
+  edu_etapa_cliente edu_etapa_cliente @relation(fields: [etapa_cliente_id], references: [etapa_cliente_id], onDelete: Cascade, onUpdate: NoAction)
+  edu_incidencia    edu_incidencia?   @relation(fields: [incidencia_id], references: [incidencia_id], onUpdate: NoAction)
+  chat_messages     ChatMessage?      @relation(fields: [chat_message_id], references: [id], onUpdate: NoAction, map: "fk_score_chat")
+
+  @@unique([chat_message_id, motivo, grupo], map: "uq_score_por_mensaje")
+  @@index([etapa_cliente_id, ocurrido_en], map: "idx_edu_score_evento")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model edu_asamblea_prevista {
+  codigo_asociado String   @id
+  fecha_asamblea  DateTime @db.Date
+  nota            String?
+  cargado_en      DateTime @default(now()) @db.Timestamptz(6)
+}
+
+enum edu_estado_conv_enum {
+  SIN_INTERACCION
+  CONFORME
+  CONFORME_INCIDENCIA_RESUELTA
+  INCONFORME_CON_DUDA
+  INCONFORME_CON_RECLAMO
+  NO_CLASIFICABLE
+}
+
+enum edu_estado_etapa_enum {
+  NO_INICIADA
+  EN_CURSO
+  CERRADA
+  SALIDA_REN1
+  SALIDA_RETIRO
+}
+
+enum edu_estado_inc_enum {
+  ABIERTA
+  EN_INTENTO
+  RESUELTA_BOT
+  DERIVADA
+  RESUELTA_HUMANO
+  ABANDONADA
+  NO_RESUELTA_CIERRE
+}
+
+enum edu_etapa_enum {
+  PRE
+  ADM
+  FID
+}
+
+enum edu_familia_enum {
+  SIN_NECESIDAD
+  PREGUNTA
+  RECLAMO
+  RETIRO
+}
+
+enum edu_riesgo_enum {
+  ALTO
+  MEDIO
+  BAJO
+}
+
+enum edu_tipo_asamblea_enum {
+  NORMAL
+  INAUGURAL
 }

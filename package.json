@@ -28,7 +28,7 @@
   "author": "Your Company",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/cloud-sql-connector": "^1.2.1",
+    "@google-cloud/cloud-sql-connector": "^1.11.1",
     "@prisma/client": "^5.22.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
