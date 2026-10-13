@@ -9,41 +9,42 @@ datasource db {
 
 /// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model Cliente {
-  id                     String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  codigoAsociado         String              @unique(map: "uq_clientes_codigo_asociado") @map("codigo_asociado") @db.VarChar(150)
-  dni                    String              @unique(map: "uq_clientes_dni") @db.VarChar(20)
-  telefono               String              @db.VarChar(20)
-  nombre                 String              @db.VarChar(150)
-  monto                  Decimal             @default(0) @db.Decimal(12, 2)
-  probabilidad           Decimal?            @db.Decimal(5, 2)
-  segmento               String?             @db.VarChar(50)
-  estrategia             String?             @db.VarChar(50)
-  fechaAsamblea          DateTime?           @map("fecha_asamblea") @db.Date
-  fechaVencimiento       DateTime?           @map("fecha_vencimiento") @db.Date
-  fecUltPagCcap          DateTime?           @map("fec_ult_pag_ccap") @db.Date
-  mes                    String?             @db.VarChar(20)
-  createdAt              DateTime            @default(now()) @map("created_at") @db.Timestamp(6)
-  updatedAt              DateTime            @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
-  frente                 String?             @db.VarChar(100)
-  fechaVencimientoPasado DateTime?           @map("fecha_vencimiento_pasado") @db.Date
-  mesPasado              String?             @map("mes_pasado") @db.VarChar(50)
-  monto1                 Decimal?            @map("monto_1") @db.Decimal(12, 2)
-  monto2                 Decimal?            @map("monto_2") @db.Decimal(12, 2)
-  monto3                 Decimal?            @map("monto_3") @db.Decimal(12, 2)
-  ctaActPag              Int?                @map("cta_act_pag")
-  telefono3              String?             @map("telefono_3") @db.VarChar(20)
-  rangoMonto             String?             @map("rango_monto") @db.VarChar(100)
-  fecha1raAsamblea       DateTime?           @map("fecha_1ra_asamblea") @db.Date
-  fechaInscripcion       DateTime?           @map("fecha_inscripcion") @db.Date
-  tipo_asamblea          String?             @db.VarChar(12)
-  opt_out                Boolean             @default(false)
-  opt_out_ts             DateTime?           @db.Timestamptz(6)
-  es_prueba              Boolean             @default(false)
-  wa_user_id             String?             @db.VarChar(64)
-  wa_username            String?             @db.VarChar(64)
+  id                     String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigoAsociado         String               @unique(map: "uq_clientes_codigo_asociado") @map("codigo_asociado") @db.VarChar(150)
+  dni                    String               @unique(map: "uq_clientes_dni") @db.VarChar(20)
+  telefono               String               @db.VarChar(20)
+  nombre                 String               @db.VarChar(150)
+  monto                  Decimal              @default(0) @db.Decimal(12, 2)
+  probabilidad           Decimal?             @db.Decimal(5, 2)
+  segmento               String?              @db.VarChar(50)
+  estrategia             String?              @db.VarChar(50)
+  fechaAsamblea          DateTime?            @map("fecha_asamblea") @db.Date
+  fechaVencimiento       DateTime?            @map("fecha_vencimiento") @db.Date
+  fecUltPagCcap          DateTime?            @map("fec_ult_pag_ccap") @db.Date
+  mes                    String?              @db.VarChar(20)
+  createdAt              DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt              DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  frente                 String?              @db.VarChar(100)
+  fechaVencimientoPasado DateTime?            @map("fecha_vencimiento_pasado") @db.Date
+  mesPasado              String?              @map("mes_pasado") @db.VarChar(50)
+  monto1                 Decimal?             @map("monto_1") @db.Decimal(12, 2)
+  monto2                 Decimal?             @map("monto_2") @db.Decimal(12, 2)
+  monto3                 Decimal?             @map("monto_3") @db.Decimal(12, 2)
+  ctaActPag              Int?                 @map("cta_act_pag")
+  telefono3              String?              @map("telefono_3") @db.VarChar(20)
+  rangoMonto             String?              @map("rango_monto") @db.VarChar(100)
+  fecha1raAsamblea       DateTime?            @map("fecha_1ra_asamblea") @db.Date
+  fechaInscripcion       DateTime?            @map("fecha_inscripcion") @db.Date
+  tipo_asamblea          String?              @db.VarChar(12)
+  opt_out                Boolean              @default(false)
+  opt_out_ts             DateTime?            @db.Timestamptz(6)
+  es_prueba              Boolean              @default(false)
+  wa_user_id             String?              @db.VarChar(64)
+  wa_username            String?              @db.VarChar(64)
   campaignContacts       CampaignContact[]
   chatMessages           ChatMessage[]
   edu_etapa_cliente      edu_etapa_cliente[]
+  preadmision_sorteo     preadmision_sorteo[]
 
   @@index([estrategia], map: "idx_clientes_estrategia")
   @@index([fechaVencimiento], map: "idx_clientes_fecha_vencimiento")
@@ -76,64 +77,40 @@ model Template {
 }
 
 model Campaign {
-  id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nombre                 String            @db.VarChar(150)
-  templateId             String            @map("template_id") @db.Uuid
-  databaseName           String            @default("clientes") @map("database_name") @db.VarChar(100)
-  sendMode               String            @map("send_mode") @db.VarChar(2)
-  segmentoFilter         String?           @map("segmento_filter")
-  estrategiaFilter       String?           @map("estrategia_filter")
-  totalContacts          Int               @default(0) @map("total_contacts")
-  status                 String            @default("draft") @db.VarChar(20)
-  createdAt              DateTime          @default(now()) @map("created_at") @db.Timestamp(6)
-  scheduledAt            DateTime?         @map("scheduled_at") @db.Timestamp(6)
-  startedAt              DateTime?         @map("started_at") @db.Timestamp(6)
-  finishedAt             DateTime?         @map("finished_at") @db.Timestamp(6)
-  variableMappings       Json              @default("{}") @map("variable_mappings")
-  frenteFilter           String?           @map("frente_filter")
-  notificationSentAt     DateTime?         @map("notification_sent_at") @db.Timestamp(6)
-  refreshOnSend          Boolean           @default(false) @map("refresh_on_send")
-  gestionType            String?           @map("gestion_type") @db.VarChar(20)
-  rangoMontoFilter       String?           @map("rango_monto_filter")
-  fechaVencimientoManual DateTime?         @map("fecha_vencimiento_manual") @db.Date
-  fechaAsambleaManual    DateTime?         @map("fecha_asamblea_manual") @db.Date
-  etapa_bot              String?           @db.VarChar(20)
-  journey_paso           String?           @db.VarChar(30)
-  bot_vinculada_at       DateTime?         @db.Timestamptz(6)
+  id                     String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre                 String               @db.VarChar(150)
+  templateId             String               @map("template_id") @db.Uuid
+  databaseName           String               @default("clientes") @map("database_name") @db.VarChar(100)
+  sendMode               String               @map("send_mode") @db.VarChar(2)
+  segmentoFilter         String?              @map("segmento_filter")
+  estrategiaFilter       String?              @map("estrategia_filter")
+  totalContacts          Int                  @default(0) @map("total_contacts")
+  status                 String               @default("draft") @db.VarChar(20)
+  createdAt              DateTime             @default(now()) @map("created_at") @db.Timestamp(6)
+  scheduledAt            DateTime?            @map("scheduled_at") @db.Timestamp(6)
+  startedAt              DateTime?            @map("started_at") @db.Timestamp(6)
+  finishedAt             DateTime?            @map("finished_at") @db.Timestamp(6)
+  variableMappings       Json                 @default("{}") @map("variable_mappings")
+  frenteFilter           String?              @map("frente_filter")
+  notificationSentAt     DateTime?            @map("notification_sent_at") @db.Timestamp(6)
+  refreshOnSend          Boolean              @default(false) @map("refresh_on_send")
+  gestionType            String?              @map("gestion_type") @db.VarChar(20)
+  rangoMontoFilter       String?              @map("rango_monto_filter")
+  fechaVencimientoManual DateTime?            @map("fecha_vencimiento_manual") @db.Date
+  fechaAsambleaManual    DateTime?            @map("fecha_asamblea_manual") @db.Date
+  etapa_bot              String?              @db.VarChar(20)
+  journey_paso           String?              @db.VarChar(30)
+  bot_vinculada_at       DateTime?            @db.Timestamptz(6)
   /// Contactos que no entraron por el Bot Educador: [{codigoAsociado, numDoc, nombre, motivo}].
   excluidos_bot          Json?
   campaignContacts       CampaignContact[]
-  template               Template          @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  template               Template             @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   mensajeOuts            MensajeOut[]
+  preadmision_sorteo     preadmision_sorteo[]
 
   @@index([status], map: "idx_campaigns_status")
   @@index([templateId], map: "idx_campaigns_template")
   @@map("campaigns")
-}
-
-/// Sorteo diario de la bienvenida de Pre-admisión: una fila por DNI sorteado.
-/// Las foráneas a campaigns y clientes existen en la base (ver
-/// prisma/add-preadmision-sorteo.sql); no se declaran como relación.
-model PreadmisionSorteo {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  dni              String    @unique(map: "uq_preadmision_sorteo_dni") @db.VarChar(20)
-  /// RETADOR recibe la bienvenida; CONTROL no recibe nada.
-  grupo            String    @db.VarChar(10)
-  fechaCorrida     DateTime  @map("fecha_corrida") @db.Date
-  semilla          BigInt
-  asambleaObjetivo DateTime  @map("asamblea_objetivo") @db.Date
-  fechaInscripcion DateTime? @map("fecha_inscripcion") @db.Date
-  nombre           String?   @db.VarChar(150)
-  telefono         String?   @db.VarChar(20)
-  codigosAsociado  String?   @map("codigos_asociado") @db.VarChar(150)
-  campaignId       String?   @map("campaign_id") @db.Uuid
-  clienteId        String?   @map("cliente_id") @db.Uuid
-  /// Todas las columnas de BD_FONDOS_COL el día del sorteo, una por contrato.
-  datosBq          Json      @map("datos_bq")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  @@index([fechaCorrida], map: "idx_preadmision_sorteo_fecha")
-  @@map("preadmision_sorteo")
 }
 
 model CampaignContact {
@@ -472,6 +449,28 @@ model edu_promesa_pago {
   chat_messages     ChatMessage?      @relation(fields: [chat_message_id], references: [id], onUpdate: NoAction)
   edu_etapa_cliente edu_etapa_cliente @relation(fields: [etapa_cliente_id], references: [etapa_cliente_id], onDelete: Cascade, onUpdate: NoAction)
   edu_incidencia    edu_incidencia?   @relation(fields: [incidencia_id], references: [incidencia_id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model preadmision_sorteo {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dni               String    @unique(map: "uq_preadmision_sorteo_dni") @db.VarChar(20)
+  grupo             String    @db.VarChar(10)
+  fecha_corrida     DateTime  @db.Date
+  semilla           BigInt
+  asamblea_objetivo DateTime  @db.Date
+  fecha_inscripcion DateTime? @db.Date
+  nombre            String?   @db.VarChar(150)
+  telefono          String?   @db.VarChar(20)
+  codigos_asociado  String?   @db.VarChar(150)
+  campaign_id       String?   @db.Uuid
+  cliente_id        String?   @db.Uuid
+  datos_bq          Json
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  campaigns         Campaign? @relation(fields: [campaign_id], references: [id], onUpdate: NoAction)
+  clientes          Cliente?  @relation(fields: [cliente_id], references: [id], onUpdate: NoAction)
+
+  @@index([fecha_corrida], map: "idx_preadmision_sorteo_fecha")
 }
 
 enum edu_estado_conv_enum {
